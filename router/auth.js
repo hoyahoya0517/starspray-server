@@ -113,6 +113,7 @@ router.put("/cart", isAuth, authController.updateCart);
 
 router.get("/me", isAuth, authController.me);
 router.get("/csrf-token", authController.csrfToken);
+test;
 
 /*----------------------------------*/
 
