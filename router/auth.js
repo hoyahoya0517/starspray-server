@@ -84,6 +84,19 @@ const validateUpdateProfile = [
   validate,
 ];
 
+const validateMoon = [
+  body("name").trim().notEmpty().withMessage("이름을 입력하세요"),
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("이메일을 입력하세요")
+    .isEmail()
+    .withMessage("이메일 양식에 맞게 입력하세요"),
+  body("paymentId").trim().notEmpty().withMessage("주문번호를 입력하세요"),
+  body("moon").trim().notEmpty().withMessage("문의내용을 입력하세요"),
+  validate,
+];
+
 router.post("/signup", validateSignup, authController.signup);
 router.post("/login", validateCredential, authController.login);
 router.post("/logout", authController.logout);
@@ -103,11 +116,17 @@ router.post(
   validatePassword,
   authController.settingPassword
 );
-
+router.post("/moon", validateMoon, authController.moon);
 /*----------------------------------*/
 
 router.post("/cart", isAuth, authController.addCart);
-router.put("/cart", isAuth, authController.updateCart);
+router.post("/cart/qty", isAuth, authController.updateCart);
+router.get("/cart/complete", isAuth, authController.completeCart);
+
+/*----------------------------------*/
+
+router.get("/getOrders", isAuth, authController.getOrders);
+router.get("/getOrder/:id", isAuth, authController.getOrder);
 
 /*----------------------------------*/
 

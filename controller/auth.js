@@ -4,6 +4,8 @@ import {} from "express-async-errors";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { sendEmail } from "./mail.js";
+import { getProductById } from "../data/product.js";
+import { sendEmail2 } from "./mail2.js";
 dotenv.config();
 
 export async function signup(req, res) {
@@ -140,6 +142,15 @@ export async function settingPassword(req, res) {
   await userRepository.changePassword(user.id, hashed);
   res.sendStatus(200);
 }
+export async function moon(req, res) {
+  const { name, email, paymentId, moon } = req.body;
+  try {
+    await sendEmail2(name, email, paymentId, moon);
+  } catch (error) {
+    return res.status(409).json({ message: "잠시 후에 다시 시도해 주세요" });
+  }
+  res.sendStatus(200);
+}
 
 /*----------------------------------*/
 
@@ -154,15 +165,106 @@ export async function addCart(req, res) {
       .status(400)
       .json({ message: "장바구니에 동일한 상품이 있습니다" });
   }
-  const newCart = [...cart, { id: productId, qty: 1 }];
-  await userRepository.addCart(req.userId, newCart);
+  const databaseProduct = await getProductById(productId);
+  if (Number(databaseProduct.qty) <= 0)
+    return res.status(400).json({ message: "현재 품절된 상품입니다" });
+  const newCart = [
+    ...cart,
+    {
+      id: productId,
+      price: databaseProduct.price,
+      qty: 1,
+      date: Date.now().toString(),
+    },
+  ];
+  await userRepository.updateCart(req.userId, newCart);
   res.sendStatus(200);
 }
 
 export async function updateCart(req, res) {
-  const { id } = req.body;
+  const body = req.body;
+  const productId = body.productId;
+  const su = Number(body.su);
   const cart = req.cart;
-  const found = await cart.find();
+  const foundCart = cart.find((cart) => cart.id === productId);
+  if (su === 1) {
+    const databaseProduct = await getProductById(productId);
+    if (!databaseProduct) return res.sendStatus(400);
+    if (Number(databaseProduct.qty) < Number(foundCart.qty) + 1)
+      return res
+        .status(400)
+        .json({ message: "상품의 수량이 재고수량 보다 많습니다" });
+    let newCart = cart;
+    const found = newCart.find((product) => product.id === productId);
+    found.qty += 1;
+    await userRepository.updateCart(req.userId, newCart);
+    return res.sendStatus(204);
+  } else if (su === -1) {
+    if (Number(foundCart.qty) - 1 === 0) {
+      const newCart = cart.filter((product) => product.id !== productId);
+      await userRepository.updateCart(req.userId, newCart);
+      return res.sendStatus(204);
+    }
+    const databaseProduct = await getProductById(productId);
+    if (!databaseProduct) return res.sendStatus(400);
+    if (Number(databaseProduct.qty) < Number(foundCart.qty) - 1) {
+      if (Number(databaseProduct.qty) === 0)
+        return res.status(400).json({ message: "상품이 품절되었습니다" });
+      else {
+        let newCart = cart;
+        const found = newCart.find((product) => product.id === productId);
+        found.qty = databaseProduct.qty;
+        await userRepository.updateCart(req.userId, newCart);
+        return res.sendStatus(204);
+      }
+    }
+    let newCart = cart;
+    const found = newCart.find((product) => product.id === productId);
+    found.qty -= 1;
+    await userRepository.updateCart(req.userId, newCart);
+    return res.sendStatus(204);
+  } else if (su === 0) {
+    const newCart = cart.filter((product) => product.id !== productId);
+    await userRepository.updateCart(req.userId, newCart);
+    return res.sendStatus(204);
+  }
+  res.sendStatus(400);
+}
+
+export async function completeCart(req, res) {
+  const newCart = [];
+  try {
+    await userRepository.updateCart(req.userId, newCart);
+  } catch (error) {
+    return res.sendStatus(400);
+  }
+  res.sendStatus(200);
+}
+
+/*----------------------------------*/
+
+export async function getOrders(req, res) {
+  const orders = await userRepository.getOrdersById(req.userId);
+  if (!orders) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+  res.status(200).json(orders);
+}
+
+export async function getOrder(req, res) {
+  const { id } = req.params;
+  const order = await userRepository.getOrderById(id);
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+  const user = await userRepository.findById(req.userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (order.customerId !== user._id.toString()) {
+    return res.status(404).json({ message: "다른 유저가 오더로 접속했음" });
+  }
+  res.status(200).json(order);
 }
 
 /*----------------------------------*/

@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getUsers } from "../database/database.js";
+import { getOrders, getUsers } from "../database/database.js";
 
 export async function findByEmail(email) {
   return getUsers()
@@ -53,7 +53,7 @@ export async function updateProfile(
   );
 }
 
-export async function addCart(id, newCart) {
+export async function updateCart(id, newCart) {
   getUsers().updateOne(
     { _id: new ObjectId(id) },
     {
@@ -65,7 +65,19 @@ export async function addCart(id, newCart) {
   );
 }
 
-export async function updateCart() {}
+export async function getOrdersById(id) {
+  return getOrders()
+    .find({ customerId: id })
+    .sort({ orderDate: -1 })
+    .toArray()
+    .then((data) => data);
+}
+
+export async function getOrderById(id) {
+  return getOrders()
+    .findOne({ paymentId: id })
+    .then((data) => data);
+}
 
 function fixId(user) {
   return user ? { ...user, id: user._id.toString() } : user;

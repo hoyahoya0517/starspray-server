@@ -12,7 +12,6 @@ export const csrfCheck = (req, res, next) => {
   }
 
   const csrfHeader = req.get("_csrf-token");
-
   if (!csrfHeader) {
     console.warn("누가 csrf-token 없이 접속 시도했다...", req.headers.origin);
     return res.status(403).json({ message: "Failed CSRF check" });

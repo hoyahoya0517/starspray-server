@@ -15,6 +15,21 @@ export async function getProductById(id) {
     .then((data) => mapOptionalProduct(data));
 }
 
+export async function getProductByCart(cart) {
+  return await Promise.all(cart.map((id) => getProductById(id)));
+}
+
+export async function updateProductById(id, newQty) {
+  getProducts().updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        qty: newQty,
+      },
+    }
+  );
+}
+
 function mapOptionalProduct(product) {
   return product ? { ...product, id: product._id.toString() } : product;
 }

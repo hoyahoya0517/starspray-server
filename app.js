@@ -7,6 +7,7 @@ import helmet from "helmet";
 import { connectDB } from "./database/database.js";
 import authRouter from "./router/auth.js";
 import productRouter from "./router/product.js";
+import paymentRouter from "./router/payment.js";
 import { csrfCheck } from "./middleware/csrf.js";
 
 const app = express();
@@ -25,7 +26,7 @@ app.use(helmet());
 app.use(csrfCheck);
 app.use("/auth", authRouter);
 app.use("/product", productRouter);
-
+app.use("/payment", paymentRouter);
 app.use((req, res, next) => {
   res.sendStatus(404);
 });

@@ -16,3 +16,11 @@ export function getUsers() {
 export function getProducts() {
   return db.collection("products");
 }
+
+export function getPayments() {
+  return db.collection("payments");
+}
+
+export function getOrders() {
+  return db.collection("orders");
+}
