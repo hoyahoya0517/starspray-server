@@ -22,6 +22,7 @@ export async function signup(req, res) {
     name,
     phone,
     email,
+    signupDate: Date.now().toString(),
     password: hashed,
     isAdmin: false,
     cart: [],
@@ -172,6 +173,7 @@ export async function addCart(req, res) {
     ...cart,
     {
       id: productId,
+      name: databaseProduct.name,
       price: databaseProduct.price,
       qty: 1,
       date: Date.now().toString(),

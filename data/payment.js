@@ -18,6 +18,7 @@ export async function orderComplete(paymentId) {
     {
       $set: {
         complete: true,
+        shipping: "주문 확인 중",
       },
     }
   );

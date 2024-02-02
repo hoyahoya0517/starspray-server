@@ -39,8 +39,6 @@ export async function checkCart(req, res) {
   await Promise.all(
     cart.map(async (product) => {
       const found = await productRepository.getProductById(product.id);
-      console.log(product);
-      console.log(found);
       if (Number(found.qty) - Number(product.qty) < 0) {
         checkProblem = true;
       }
