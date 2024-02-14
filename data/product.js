@@ -9,6 +9,14 @@ export async function getAllProducts() {
     .then((data) => mapProducts(data));
 }
 
+export async function getAllProductsByCategory(category) {
+  return getProducts()
+    .find({ category })
+    .sort({ uploadedAt: -1 })
+    .toArray()
+    .then((data) => mapProducts(data));
+}
+
 export async function getProductById(id) {
   return getProducts()
     .findOne({ _id: new ObjectId(id) })

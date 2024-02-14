@@ -2,7 +2,10 @@ import * as productRepository from "../data/product.js";
 import * as userRepository from "../data/auth.js";
 
 export async function getProducts(req, res) {
-  const products = await productRepository.getAllProducts();
+  const { category } = req.params;
+  let products;
+  if (category === "all") products = await productRepository.getAllProducts();
+  else products = await productRepository.getAllProductsByCategory(category);
   res.status(200).json(products);
 }
 

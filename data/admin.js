@@ -54,7 +54,8 @@ export async function updateOrder(
   address2,
   complete,
   refund,
-  shipping
+  shipping,
+  traking
 ) {
   getOrders().updateOne(
     { _id: new ObjectId(id) },
@@ -68,6 +69,7 @@ export async function updateOrder(
         complete,
         refund,
         shipping,
+        traking,
       },
     }
   );

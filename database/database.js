@@ -24,3 +24,7 @@ export function getPayments() {
 export function getOrders() {
   return db.collection("orders");
 }
+
+export function getQuestions() {
+  return db.collection("questions");
+}

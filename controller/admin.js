@@ -69,7 +69,8 @@ export async function updateOrder(req, res) {
       order.address2,
       order.complete,
       order.refund,
-      order.shipping
+      order.shipping,
+      order.traking
     );
   } catch (error) {
     return res.status(400).json({ message: "db에 업데이트할 때 오류발생" });

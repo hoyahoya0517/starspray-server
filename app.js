@@ -9,6 +9,7 @@ import authRouter from "./router/auth.js";
 import productRouter from "./router/product.js";
 import paymentRouter from "./router/payment.js";
 import adminRouter from "./router/admin.js";
+import questionRouter from "./router/question.js";
 import { csrfCheck } from "./middleware/csrf.js";
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/auth", authRouter);
 app.use("/product", productRouter);
 app.use("/payment", paymentRouter);
 app.use("/admin", adminRouter);
+app.use("/question", questionRouter);
 app.use((req, res, next) => {
   res.sendStatus(404);
 });

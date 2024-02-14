@@ -16,7 +16,7 @@ export async function sendEmail2(name, email, paymentId, moon) {
   // send mail with defined transport object
   try {
     const info = await transporter.sendMail({
-      from: `"👻" <${String(process.env.EMAIL)}>`, // sender address
+      from: "Foo from @bar.com <donotreply@bar.com>", // sender address
       to: "sakao0517@naver.com", // list of receivers
       subject: `${name} : 문의사항 있음`, // Subject line
       html:
@@ -26,6 +26,17 @@ export async function sendEmail2(name, email, paymentId, moon) {
         `<spap>문의내용 : ${moon}</span>`,
     });
     console.log("문의 이메일 발송 ", email);
+  } catch (error) {
+    console.log(error);
+    throw Error(error);
+  }
+  try {
+    const info2 = await transporter.sendMail({
+      from: "Foo from @bar.com <donotreply@bar.com>", // sender address
+      to: email, // list of receivers
+      subject: `[이카리]문의사항이 접수되었습니다`, // Subject line
+      html: `안녕하세요 ${name} 고객님`,
+    });
   } catch (error) {
     console.log(error);
     throw Error(error);

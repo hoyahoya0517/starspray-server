@@ -38,7 +38,11 @@ const validateOrder = [
 const validateAuth = [
   body("name").trim().notEmpty().withMessage("이름을 입력하세요"),
   body("phone").trim().notEmpty().withMessage("전화번호를 입력하세요"),
-  body("password").trim().notEmpty().withMessage("비밀번호를 입력하세요"),
+  body("password")
+    .trim()
+    .notEmpty()
+    .isLength({ min: 6 })
+    .withMessage("비밀번호를 입력하세요"),
   body("isAdmin").isBoolean().withMessage("isAdmin을 정확히 입력하세요"),
   validate,
 ];
@@ -54,8 +58,8 @@ router.delete("/product/:id", isAdmin, adminController.deleteProduct);
 
 router.get("/orders", isAdmin, adminController.getAllOrders);
 router.put("/updateOrder", validateOrder, isAdmin, adminController.updateOrder);
-router.delete("/order/:id", isAdmin, adminController.deleteOrder);
 router.post("/order/refund", isAdmin, adminController.refundOrder);
+router.delete("/order/:id", isAdmin, adminController.deleteOrder);
 
 router.get("/auth", isAdmin, adminController.getAllAuth);
 router.put("/updateAuth", validateAuth, isAdmin, adminController.updateAuth);

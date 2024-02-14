@@ -16,7 +16,7 @@ export async function sendEmail(email, token) {
   // send mail with defined transport object
   try {
     const info = await transporter.sendMail({
-      from: `"👻" <${String(process.env.EMAIL)}>`, // sender address
+      from: "Foo from @bar.com <donotreply@bar.com>", // sender address
       to: email, // list of receivers
       subject: "Hello ✔", // Subject line
       html:
