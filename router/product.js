@@ -9,7 +9,7 @@ router.get("/category/:category", productController.getProducts);
 router.get("/detail/:id", productController.getProduct);
 router.get("/cart", isAuth, productController.getProductByCart);
 router.post("/cart/check", isAuth, productController.checkCart);
-router.post("/cart/complete", isAuth, productController.payCompleteCart);
+// router.post("/cart/complete", isAuth, productController.payCompleteCart);
 router.get("/order/:id", isAuth, productController.getProductByOrder);
 
 export default router;

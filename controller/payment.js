@@ -1,7 +1,8 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import * as paymentRepository from "../data/payment.js";
-import * as authRepository from "../data/auth.js";
+import * as productRepository from "../data/product.js";
+import * as userRepository from "../data/auth.js";
 dotenv.config();
 
 export async function newOrder(req, res) {
@@ -9,13 +10,35 @@ export async function newOrder(req, res) {
   const id = await paymentRepository.newOrder(order);
   if (!id)
     return res.status(400).json({ message: "결제 진행에 문제가 발생했습니다" });
+  //결제가 complete되지 않으면 30분후에 결제내역 삭제
+  setTimeout(async () => {
+    const checkOrder = await paymentRepository.getOrder(order.paymentId);
+    if (!checkOrder) return;
+    if (!checkOrder.complete)
+      await paymentRepository.deleteOrder(checkOrder.id);
+    console.log(
+      `${checkOrder.paymentId}는 결제가 complete되지않아 결제내역을 삭제합니다`
+    );
+  }, 1000 * 60 * 30);
   res.sendStatus(200);
 }
 
 export async function complete(req, res) {
+  // 요청의 body로 SDK의 응답 중 paymentId가 오기를 기대합니다.
+  const { paymentId, success } = req.query;
+  if (!paymentId)
+    return res.status(400).send({ message: "결제 검증에 문제가 발생했습니다" });
+  const checkOrder = await paymentRepository.getOrder(paymentId);
+  if (!checkOrder) {
+    return res.status(400).send({ message: "결제를 먼저 해주세요" });
+  }
+  if (!success) {
+    await paymentRepository.deleteOrder(checkOrder.id);
+    return res.status(400).send({ message: "결제 검증에 문제가 발생했습니다" });
+  }
+  if (checkOrder.complete === true)
+    return res.status(400).send({ message: "이미 완료된 결제입니다" });
   try {
-    // 요청의 body로 SDK의 응답 중 paymentId가 오기를 기대합니다.
-    const { paymentId } = req.body;
     // 1. 포트원 API를 사용하기 위해 액세스 토큰을 발급받습니다.
     const signinResponse = await axios({
       url: "https://api.portone.io/login/api-secret",
@@ -45,11 +68,13 @@ export async function complete(req, res) {
         }
         case "PAID": {
           await paymentRepository.orderComplete(id);
+          await payCompleteCart(checkOrder);
+          await authCompleteCart(checkOrder);
           return res.sendStatus(200);
         }
       }
     } else {
-      console.warn("위변조 감지 ", order);
+      console.warn("위변조 감지", order);
       return res
         .status(400)
         .json({ message: "결제금액 위변조가 감지되었습니다" });
@@ -58,4 +83,20 @@ export async function complete(req, res) {
     // 결제 검증에 실패했습니다.
     res.status(400).send({ message: "결제 검증에 문제가 발생했습니다" });
   }
+}
+
+async function payCompleteCart(checkOrder) {
+  const cart = checkOrder.cart;
+  await Promise.all(
+    cart.map(async (product) => {
+      const found = await productRepository.getProductById(product.id);
+      const newQty = Number(found.qty) - Number(product.qty);
+      productRepository.updateProductById(product.id, newQty);
+    })
+  );
+}
+
+async function authCompleteCart(checkOrder) {
+  const newCart = [];
+  await userRepository.updateCart(checkOrder.customerId, newCart);
 }

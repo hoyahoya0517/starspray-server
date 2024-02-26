@@ -6,6 +6,6 @@ import * as paymentController from "../controller/payment.js";
 const router = express.Router();
 
 router.post("/newOrder", isAuth, paymentController.newOrder);
-router.post("/complete", isAuth, paymentController.complete);
+router.get("/complete", isAuth, paymentController.complete);
 
 export default router;

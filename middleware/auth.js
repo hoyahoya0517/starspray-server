@@ -19,7 +19,7 @@ export const isAuth = async (req, res, next) => {
   }
   jwt.verify(token, process.env.JWT_SECRET_KEY, async (error, decoded) => {
     if (error) {
-      return res.status(401).json({ message: "verify timeout" });
+      return res.status(401).json({ message: "다시 로그인해 주세요" });
     }
     const user = await userRepository.findById(decoded.userId);
     if (!user) {

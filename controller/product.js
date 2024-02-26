@@ -54,18 +54,18 @@ export async function checkCart(req, res) {
   res.sendStatus(200);
 }
 
-export async function payCompleteCart(req, res) {
-  const { cart } = req.body;
-  try {
-    await Promise.all(
-      cart.map(async (product) => {
-        const found = await productRepository.getProductById(product.id);
-        const newQty = Number(found.qty) - Number(product.qty);
-        productRepository.updateProductById(product.id, newQty);
-      })
-    );
-  } catch (error) {
-    return res.status(400).json({ message: "결제 진행에 문제가 발생했습니다" });
-  }
-  res.sendStatus(200);
-}
+// export async function payCompleteCart(req, res) {
+//   const { cart } = req.body;
+//   try {
+//     await Promise.all(
+//       cart.map(async (product) => {
+//         const found = await productRepository.getProductById(product.id);
+//         const newQty = Number(found.qty) - Number(product.qty);
+//         productRepository.updateProductById(product.id, newQty);
+//       })
+//     );
+//   } catch (error) {
+//     return res.status(400).json({ message: "결제 진행에 문제가 발생했습니다" });
+//   }
+//   res.sendStatus(200);
+// }
