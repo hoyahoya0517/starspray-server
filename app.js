@@ -17,8 +17,8 @@ dotenv.config();
 
 const app = express();
 const corsOption = {
-  // origin: "https://star-spray.com",
-  origin: "http://localhost:3000",
+  origin: "https://star-spray.com",
+  // origin: "http://localhost:3000",
   optionsSuccessStatus: 200,
   credentials: true,
 };
