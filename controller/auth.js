@@ -58,6 +58,15 @@ export async function logout(req, res) {
   res.status(200).json({ message: "Logout Success" });
 }
 
+export async function deleteUser(req, res) {
+  const user = await userRepository.findById(req.userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await userRepository.deleteUser(user.id);
+  res.sendStatus(204);
+}
+
 /*----------------------------------*/
 
 export async function getUserInfo(req, res) {
@@ -193,9 +202,7 @@ export async function updateCart(req, res) {
     const databaseProduct = await getProductById(productId);
     if (!databaseProduct) return res.sendStatus(400);
     if (Number(databaseProduct.qty) < Number(foundCart.qty) + 1)
-      return res
-        .status(400)
-        .json({ message: "상품의 수량이 재고수량 보다 많습니다" });
+      return res.status(400).json({ message: "최대 수량입니다" });
     let newCart = cart;
     const found = newCart.find((product) => product.id === productId);
     found.qty += 1;

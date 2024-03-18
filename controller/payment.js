@@ -11,33 +11,36 @@ export async function newOrder(req, res) {
   if (!id)
     return res.status(400).json({ message: "결제 진행에 문제가 발생했습니다" });
   //결제가 complete되지 않으면 30분후에 결제내역 삭제
-  setTimeout(async () => {
-    const checkOrder = await paymentRepository.getOrder(order.paymentId);
-    if (!checkOrder) return;
-    if (!checkOrder.complete)
-      await paymentRepository.deleteOrder(checkOrder.id);
-    console.log(
-      `${checkOrder.paymentId}는 결제가 complete되지않아 결제내역을 삭제합니다`
-    );
-  }, 1000 * 60 * 30);
+  // setTimeout(async () => {
+  //   const checkOrder = await paymentRepository.getOrder(order.paymentId);
+  //   if (!checkOrder) return;
+  //   if (!checkOrder.complete)
+  //     await paymentRepository.deleteOrder(checkOrder.id);
+  //   console.log(
+  //     `${checkOrder.paymentId}는 결제가 complete되지않아 결제내역을 삭제합니다`
+  //   );
+  // }, 1000 * 60 * 30);
   res.sendStatus(200);
 }
 
 export async function complete(req, res) {
   // 요청의 body로 SDK의 응답 중 paymentId가 오기를 기대합니다.
   const { paymentId, success } = req.query;
-  if (!paymentId)
-    return res.status(400).send({ message: "결제 검증에 문제가 발생했습니다" });
+  if (!paymentId) {
+    return res.status(400).json({ message: "결제 검증에 문제가 발생했습니다" });
+  }
   const checkOrder = await paymentRepository.getOrder(paymentId);
   if (!checkOrder) {
-    return res.status(400).send({ message: "결제를 먼저 해주세요" });
+    return res.status(400).json({ message: "결제를 먼저 해주세요" });
   }
-  if (!success) {
-    await paymentRepository.deleteOrder(checkOrder.id);
-    return res.status(400).send({ message: "결제 검증에 문제가 발생했습니다" });
+  if (success === "false") {
+    // 잘못된 주문 삭제
+    // await paymentRepository.deleteOrder(checkOrder.id);
+    return res.status(400).json({ message: "결제 검증에 문제가 발생했습니다" });
   }
-  if (checkOrder.complete === true)
-    return res.status(400).send({ message: "이미 완료된 결제입니다" });
+  if (checkOrder.complete === true) {
+    return res.status(400).json({ message: "이미 완료된 결제입니다" });
+  }
   try {
     // 1. 포트원 API를 사용하기 위해 액세스 토큰을 발급받습니다.
     const signinResponse = await axios({

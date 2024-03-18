@@ -14,7 +14,7 @@ export const isAdmin = async (req, res, next) => {
     token = req.cookies["token"];
   }
   if (!token) {
-    console.log("auth토큰 오류");
+    console.log("auth token error");
     return res.status(401).json(AUTH_ERROR);
   }
   jwt.verify(token, process.env.JWT_SECRET_KEY, async (error, decoded) => {
@@ -23,11 +23,11 @@ export const isAdmin = async (req, res, next) => {
     }
     const user = await userRepository.findById(decoded.userId);
     if (!user) {
-      console.log("auth토큰은 있지만 함수오류");
+      console.log("auth function error");
       return res.status(401).json(AUTH_ERROR);
     }
     if (!user.isAdmin) {
-      console.log("admin아닌사람이 접속한다");
+      console.log("no admin is comming");
       return res.status(401).json(AUTH_ERROR);
     }
     req.userId = user.id;

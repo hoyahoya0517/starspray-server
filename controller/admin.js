@@ -3,6 +3,7 @@ import * as adminRepository from "../data/admin.js";
 import axios from "axios";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { response } from "express";
 dotenv.config();
 
 export async function addProducts(req, res) {
@@ -90,7 +91,7 @@ export async function deleteOrder(req, res) {
 }
 
 export async function refundOrder(req, res) {
-  const { paymentId } = req.body;
+  let { amount, paymentId } = req.body;
 
   // 1. 포트원 API를 사용하기 위해 액세스 토큰을 발급받습니다.
   const signinResponse = await axios({
@@ -103,20 +104,16 @@ export async function refundOrder(req, res) {
   });
   const { accessToken } = signinResponse.data;
 
-  console.log(accessToken);
-  const refundResponse = await axios({
-    url: `https://api.portone.io/payments/${encodeURIComponent(
-      paymentId
-    )}/cancel`,
-    method: "post",
-    data: {
-      reason: "환불",
-    },
-    // 1번에서 발급받은 액세스 토큰을 Bearer 형식에 맞게 넣어주세요.
-    headers: { Authorization: "Bearer " + accessToken },
-  });
-  //테스트라 이미 취소된 결제라 뜸
-  //todo : order의 refund값 true로 바꾸기
+  try {
+    const response = await axios.post(
+      `https://api.portone.io/payments/${encodeURIComponent(paymentId)}/cancel`,
+      { amount: Number(amount), reason: "환불" },
+      { headers: { Authorization: "Bearer " + accessToken } }
+    );
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.response.data.message });
+  }
   res.sendStatus(200);
 }
 
@@ -148,6 +145,7 @@ export async function updateAuth(req, res) {
       auth.address2
     );
   } catch (error) {
+    console.log("error");
     return res.status(400).json({ message: "db에 업데이트할 때 오류발생" });
   }
   res.sendStatus(200);

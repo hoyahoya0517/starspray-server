@@ -100,6 +100,7 @@ const validateMoon = [
 router.post("/signup", validateSignup, authController.signup);
 router.post("/login", validateCredential, authController.login);
 router.post("/logout", authController.logout);
+router.delete("/delete", isAuth, authController.deleteUser);
 
 /*----------------------------------*/
 

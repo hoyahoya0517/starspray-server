@@ -16,9 +16,9 @@ export async function sendEmail(email, token) {
   // send mail with defined transport object
   try {
     const info = await transporter.sendMail({
-      from: "Foo from @bar.com <donotreply@bar.com>", // sender address
+      from: `Star Spray <${process.env.EMAIL}>`, // sender address
       to: email, // list of receivers
-      subject: "Hello ✔", // Subject line
+      subject: "비밀번호 초기화를 위한 안내 메일입니다", // Subject line
       html:
         "<p>비밀번호 초기화를 위해 아래의 URL을 클릭하여 주세요.</p>" +
         `<a href="http://localhost:3000/settingPassword/${token}">비밀번호 재설정 링크</a>`,

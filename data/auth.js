@@ -19,6 +19,10 @@ export async function createUser(user) {
     .then((data) => data.insertedId.toString());
 }
 
+export async function deleteUser(id) {
+  getUsers().deleteOne({ _id: new ObjectId(id) });
+}
+
 export async function changePassword(id, newPassword) {
   getUsers().updateOne(
     { _id: new ObjectId(id) },
@@ -67,7 +71,7 @@ export async function updateCart(id, newCart) {
 
 export async function getOrdersById(id) {
   return getOrders()
-    .find({ customerId: id })
+    .find({ customerId: id, complete: true })
     .sort({ orderDate: -1 })
     .toArray()
     .then((data) => data);
